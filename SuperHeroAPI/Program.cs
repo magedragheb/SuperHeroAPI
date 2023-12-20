@@ -1,11 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using SuperHeroAPI.Endpoints;
 using SuperHeroAPI.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<HeroContext>(opt => opt
                 .UseSqlite("Data Source=Data/SuperHeroDB"));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddAuthorization();
+builder.Services.AddIdentityApiEndpoints<AppUser>()
+                .AddEntityFrameworkStores<HeroContext>();
 builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -26,6 +30,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseHttpsRedirection();
-app.MapGet("/", () => "Hello World!");
+//map identity api endpoints
+app.MapIdentityApi<AppUser>().WithTags("Identity");
+//map heroes api endpoints
+app.MapHeroes();
 
 app.Run();
