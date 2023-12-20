@@ -9,5 +9,5 @@
 
 How to run:
 
-1. git clone https://github.com/magedragheb/SuperHeroAPI
-2. run `dotnet ef database update`
+1. `git clone https://github.com/magedragheb/SuperHeroAPI`
+2. `dotnet ef database update`
