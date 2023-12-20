@@ -1,5 +1,8 @@
 namespace SuperHeroAPI.Entities;
 
+/// <summary>
+/// Hero entity holds hero information and saved as a user favourite
+/// </summary>
 public class Hero
 {
     public Guid Id { get; set; }

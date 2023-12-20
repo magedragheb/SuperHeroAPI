@@ -7,10 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<HeroContext>(opt => opt
                 .UseSqlite("Data Source=Data/SuperHeroDB"));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+//add authorization using Identity and its endpoints
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<AppUser>()
                 .AddEntityFrameworkStores<HeroContext>();
+//add httpclient to access remote api
 builder.Services.AddHttpClient();
+//add swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
