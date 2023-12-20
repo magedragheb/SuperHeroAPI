@@ -1,5 +1,5 @@
-
 using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using SuperHeroAPI.Entities;
 
@@ -36,7 +36,8 @@ public static class Endpoints
     /// <param name="context">HttpContext</param>
     /// <param name="db">DbContext</param>
     /// <returns>Current User or null if not found</returns>
-    public static async Task<AppUser?> GetCurrentUser(HttpContext context, HeroContext db)
+    public static async Task<AppUser?> GetCurrentUser(HttpContext context,
+    HeroContext db)
     {
         var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
         var user = await db.AppUsers
@@ -47,7 +48,6 @@ public static class Endpoints
     }
 
     //use secrets
-    //fix responses json
 
     /// <summary>
     /// Searches external api for superhero
@@ -65,12 +65,15 @@ public static class Endpoints
         {
             // Read and return the content of the response
             var content = await response.Content.ReadAsStringAsync();
-            return TypedResults.Ok(content);
+            var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+            { WriteIndented = true };
+            return TypedResults.Json(content, options);
         }
         else
         {
             // Handle the error case
-            return TypedResults.BadRequest($"Failed to fetch data. Status code: {response.StatusCode}");
+            return TypedResults.BadRequest(
+                $"Failed to fetch data. Status code: {response.StatusCode}");
         }
     }
 
@@ -90,12 +93,15 @@ public static class Endpoints
         {
             // Read and return the content of the response
             var content = await response.Content.ReadAsStringAsync();
+            // var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+            // { WriteIndented = true };
             return TypedResults.Ok(content);
         }
         else
         {
             // Handle the error case
-            return TypedResults.BadRequest($"Failed to fetch data. Status code: {response.StatusCode}");
+            return TypedResults.BadRequest(
+                $"Failed to fetch data. Status code: {response.StatusCode}");
         }
     }
 
@@ -109,7 +115,10 @@ public static class Endpoints
     {
         var currentUser = GetCurrentUser(context, db).Result;
         if (currentUser == null) return TypedResults.Unauthorized();
-        return TypedResults.Ok(await db.Heroes.Where(h => currentUser.Heroes.Contains(h)).ToListAsync());
+        return TypedResults.Ok(await db.Heroes
+                            .Where(h => currentUser.Heroes.Contains(h))
+                            .Select(s => new { s.ApiId, s.Name })
+                            .ToListAsync());
     }
 
     /// <summary>
@@ -119,12 +128,14 @@ public static class Endpoints
     /// <param name="context">HttpContext</param>
     /// <param name="heroId">Id from remote Api</param>
     /// <returns></returns>
-    static async Task<IResult> AddFavourite(HeroContext db, HttpContext context,
+    static async Task<IResult> AddFavourite(HeroContext db,
+    HttpContext context,
     int heroId)
     {
         var currentUser = GetCurrentUser(context, db).Result;
         if (currentUser == null) return TypedResults.Unauthorized();
-        var hero = await db.Heroes.FindAsync(heroId);
+        var hero = await db.Heroes.Where(h => h.ApiId == heroId)
+                                    .FirstOrDefaultAsync();
         //save hero once
         if (hero == null)
         {
@@ -132,14 +143,14 @@ public static class Endpoints
             await db.Heroes.AddAsync(newhero);
             currentUser.Heroes.Add(newhero);
             await db.SaveChangesAsync();
-            return TypedResults.Created($"/heroes/{newhero.Id}", newhero);
+            return TypedResults.Created($"/heroes/{newhero.Id}");
         }
         //if already a favourite return it
-        if (currentUser.Heroes.Contains(hero)) return TypedResults.Ok(hero);
+        if (currentUser.Heroes.Contains(hero)) return TypedResults.Ok(hero.Id);
         //else add it to favourites
         currentUser.Heroes.Add(hero);
         await db.SaveChangesAsync();
-        return TypedResults.Created($"/heroes/{hero.Id}", hero);
+        return TypedResults.Created($"/heroes/{hero.Id}");
     }
 
     /// <summary>
@@ -149,12 +160,14 @@ public static class Endpoints
     /// <param name="context">HttpContext</param>
     /// <param name="heroId">Id from remote Api</param>
     /// <returns></returns>
-    static async Task<IResult> DeleteFavourite(HeroContext db, HttpContext context,
+    static async Task<IResult> DeleteFavourite(HeroContext db,
+    HttpContext context,
     int heroId)
     {
         var currentUser = GetCurrentUser(context, db).Result;
         if (currentUser == null) return TypedResults.Unauthorized();
-        var hero = await db.Heroes.FindAsync(heroId);
+        var hero = await db.Heroes.Where(h => h.ApiId == heroId)
+                                    .FirstOrDefaultAsync();
         if (hero == null) return TypedResults.NotFound();
         //remove from favourites
         currentUser.Heroes.Remove(hero);
