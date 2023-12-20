@@ -3,3 +3,5 @@
 /SuperHeroApi/bin
 /SuperHeroApi/obj
 /SuperHeroApi/Properties
+/SuperHeroApi/Data/*
+!SuperHeroApi/Data/.gitkeep
