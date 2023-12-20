@@ -6,5 +6,5 @@ public class Hero
     public string Name { get; set; } = "";
     public int ApiId { get; set; }
 
-    public ICollection<AppUser> Users { get; set; } = [];
+    public ICollection<AppUser> AppUsers { get; set; } = [];
 }
