@@ -4,4 +4,5 @@
 /SuperHeroApi/obj
 /SuperHeroApi/Properties
 /SuperHeroApi/Data/*
-!SuperHeroApi/Data/.gitkeep
+!SuperHeroApi/Data/.gitkeep 
+!SuperHeroApi/Data/Migrations
