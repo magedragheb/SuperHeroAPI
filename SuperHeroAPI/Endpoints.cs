@@ -130,7 +130,8 @@ public static class Endpoints
     /// <returns></returns>
     static async Task<IResult> AddFavourite(HeroContext db,
     HttpContext context,
-    int heroId)
+    int heroId,
+    string name)
     {
         var currentUser = GetCurrentUser(context, db).Result;
         if (currentUser == null) return TypedResults.Unauthorized();
@@ -139,7 +140,7 @@ public static class Endpoints
         //save hero once
         if (hero == null)
         {
-            var newhero = new Hero { ApiId = heroId };
+            var newhero = new Hero { ApiId = heroId, Name = name };
             await db.Heroes.AddAsync(newhero);
             currentUser.Heroes.Add(newhero);
             await db.SaveChangesAsync();
