@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SuperHeroAPI.Endpoints;
@@ -24,9 +25,16 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Reading heroes from https://superheroapi.com/ and adding to favourites per user"
     });
 });
+//configure Json serializer options
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.WriteIndented = true;
+    options.SerializerOptions.IncludeFields = true;
+    options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
 
 var app = builder.Build();
-app.Urls.Add("https://localhost:5000");
+app.Urls.Add("https://localhost:5000/swagger");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
