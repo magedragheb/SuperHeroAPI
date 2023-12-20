@@ -1,4 +1,4 @@
-namespace SuperHeroAPI;
+namespace SuperHeroAPI.Endpoints;
 public static class Endpoints
 {
     public static RouteGroupBuilder MapHeroes(this IEndpointRouteBuilder routes)
@@ -12,10 +12,7 @@ public static class Endpoints
         //add favourite
         //delete from favourites
         //get all favourites
-        group.MapGet("/", () =>
-        {
-
-        });
+        group.MapGet("/", () => "Hello Heroes");
         return group;
     }
 }
