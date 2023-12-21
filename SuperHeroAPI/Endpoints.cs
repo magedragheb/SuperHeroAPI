@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using SuperHeroAPI.Entities;
 
@@ -47,17 +46,17 @@ public static class Endpoints
         return user ?? null;
     }
 
-    //use secrets
 
     /// <summary>
     /// Searches external api for superhero
     /// </summary>
     /// <param name="httpClient">HttpClient</param>
     /// <param name="name">hero name to search for</param>
+    /// <param name="config">configuration key/value pairs</param>
     /// <returns>json object of one superhero or a list that shares the same name</returns>
-    static async Task<IResult> SearchSuperhero(HttpClient httpClient, string name)
+    static async Task<IResult> SearchSuperhero(HttpClient httpClient, string name, IConfiguration config)
     {
-        var token = "1388746048401439";
+        var token = config["superheroapitoken"];
         var apiUrl = $"https://superheroapi.com/api/{token}/search/{name}";
         // Make a GET request to the external API
         var response = await httpClient.GetAsync(apiUrl);
@@ -65,9 +64,7 @@ public static class Endpoints
         {
             // Read and return the content of the response
             var content = await response.Content.ReadAsStringAsync();
-            var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
-            { WriteIndented = true };
-            return TypedResults.Json(content, options);
+            return TypedResults.Ok(content);
         }
         else
         {
@@ -82,10 +79,11 @@ public static class Endpoints
     /// </summary>
     /// <param name="httpClient">HttpClient</param>
     /// <param name="heroId">hero Id to search for</param>
+    /// <param name="config">configuration key/value pairs</param>
     /// <returns>json object of one superhero</returns>
-    static async Task<IResult> GetHeroById(HttpClient httpClient, int heroId)
+    static async Task<IResult> GetHeroById(HttpClient httpClient, int heroId, IConfiguration config)
     {
-        var token = "1388746048401439";
+        var token = config["superheroapitoken"];
         var apiUrl = $"https://superheroapi.com/api/{token}/{heroId}";
         // Make a GET request to the external API
         var response = await httpClient.GetAsync(apiUrl);
@@ -93,8 +91,6 @@ public static class Endpoints
         {
             // Read and return the content of the response
             var content = await response.Content.ReadAsStringAsync();
-            // var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
-            // { WriteIndented = true };
             return TypedResults.Ok(content);
         }
         else
