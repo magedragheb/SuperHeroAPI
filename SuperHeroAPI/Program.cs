@@ -34,7 +34,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 var app = builder.Build();
-app.Urls.Add("https://localhost:5000/swagger");
+app.Urls.Add("https://localhost:5000");
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
